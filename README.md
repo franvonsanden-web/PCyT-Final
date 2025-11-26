@@ -1,77 +1,121 @@
-Proyecto MusicGenerator – Entregable
+# 🎵 Music Generator & Stem Separator AI
 
-1. Introducción
-Este proyecto implementa una aplicación web para la generación y el procesamiento de audio basada en inteligencia artificial y señal digital. Permite al usuario subir archivos de audio, aplicar una separación de pistas (“stems”), mezclar pistas resultantes, y descargar el resultado desde una interfaz accesible vía navegador. La aplicación está desarrollada con Python 3 y el micro-framework Flask.
+> **Version 2.0** | Powered by **Demucs** & **MusicGen**
 
-2. Objetivos
-Objetivo general
-Construir una plataforma funcional que facilite la manipulación automatizada de audio (separación de stems, mezcla de pistas) con una interfaz web intuitiva.
-Objetivos específicos
-- Implementar la funcionalidad de carga de archivos mediante formulario web.
-- Integrar un módulo de procesamiento de audio para separación de stems (separate_stems) y mezcla (mix_tracks).
-- Proporcionar rutas web que permitan la descarga del audio resultante.
-- Documentar correctamente la instalación, uso y arquitectura del sistema.
+Una aplicación web profesional para separar pistas de audio (stems) y generar variaciones musicales utilizando Inteligencia Artificial de última generación.
 
-3. Arquitectura general
-La aplicación consta de los siguientes componentes:
-1. Interfaz Web: Formularios HTML que permiten al usuario subir archivo(s) de audio y seleccionar parámetros de procesamiento.
-2. Backend Flask: Módulo principal (main.py o similar) que recibe la solicitud, gestiona archivos, invoca los módulos de procesamiento (procesamiento_audio.py) y devuelve el archivo final.
-3. Módulos de dominio (clases.py): Definición de clases como ProyectoAudio, Cancion y Pista, que abstraen la lógica de negocio del audio.
-4. Procesamiento de audio: Funciones separate_stems y mix_tracks que ejecutan la lógica de análisis y composición de audio.
-5. Almacenamiento temporal: Carpeta “uploads/” para archivos recibidos y “output/” (u otro nombre) para archivos generados.
+---
 
-4. Instalación & configuración
-Requisitos previos
-- Python 3.10 o superior
-- pip
-- git
-- (Opcional) GPU con soporte para aceleración si el procesamiento de stems lo requiere
-- FFmpeg (instalado en el sistema) si el procesamiento de audio lo requiere
+## 🚀 Características Principales
 
-Instalación
-git clone https://github.com/monicadeus/musicgenerator_entregable.git
-cd musicgenerator_entregable
+*   **Separación de Stems**: Aísla Voces, Batería, Bajo y Otros instrumentos de cualquier canción usando el modelo **Demucs (Hybrid Transformer)**.
+*   **Visualización de Ondas**: Renderizado de formas de onda en tiempo real para cada pista separada.
+*   **Generación AI**: Crea nuevas variaciones de stems (ej. "batería estilo techno") usando **Facebook MusicGen**.
+*   **Interfaz Moderna**: UI limpia y responsiva diseñada para un flujo de trabajo eficiente.
+
+---
+
+## 📋 Requisitos Previos
+
+Antes de comenzar, asegúrate de tener instalado:
+
+1.  **Python 3.10 o superior**: [Descargar Python](https://www.python.org/downloads/)
+2.  **FFmpeg**: **CRUCIAL**. El sistema de audio NO funcionará sin esto.
+    *   **Windows**: [Guía de instalación](https://www.wikihow.com/Install-FFmpeg-on-Windows)
+    *   **Mac**: `brew install ffmpeg`
+    *   **Linux**: `sudo apt install ffmpeg`
+3.  **Git**: Para clonar el repositorio.
+
+---
+
+## 🛠️ Guía de Instalación Paso a Paso
+
+### 1. Clonar el Repositorio
+```bash
+git clone https://github.com/franvonsanden-web/PCyT-Final.git
+cd PCyT-Final
+```
+
+### 2. Crear Entorno Virtual (Recomendado)
+Para evitar conflictos con otras librerías de Python:
+
+**Windows:**
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+**Mac/Linux:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 3. Instalar Dependencias
+Instala todas las librerías necesarias (Flask, Torch, Librosa, etc.):
+```bash
 pip install -r requirements.txt
+```
+> *Nota: La primera instalación puede tardar unos minutos ya que descargará PyTorch.*
 
-Configuración
-- Modificar, si es necesario, rutas de subida/resultados en app.py.
-- Verificar los permisos de lectura/escritura en las carpetas uploads/ y output/.
-- Si se usa GPU o librerías especiales, configurar el entorno apropiado.
+---
 
-5. Uso de la aplicación
-Ejecución
-python src/main.py
-La aplicación se ejecutará en http://127.0.0.1:3838.
+## ▶️ Ejecución del Proyecto
 
-Flujo de uso
-1. Acceder al formulario web.
-2. Subir un archivo de audio (por ejemplo en formato WAV o MP3).
-3. Seleccionar opciones de procesamiento: “Separar stems”, “Mezclar pistas”, etc.
-4. Hacer clic en “Procesar”.
-5. Una vez completado, descargar el archivo resultante desde el enlace provisto.
+1.  Asegúrate de que tu entorno virtual esté activado.
+2.  Inicia el servidor Flask:
+```bash
+python app.py
+```
+3.  Verás un mensaje indicando que el servidor está corriendo (usualmente en el puerto 3838).
+4.  Abre tu navegador y ve a:
+    **[http://localhost:3838](http://localhost:3838)**
 
-6. Explicación técnica
-Gestión de archivos
-Se utiliza Flask para recibir archivos vía request.files y gestionar su almacenamiento temporal con werkzeug.utils.secure_filename a fin de evitar problemas de seguridad.
-Separación de stems y mezcla
-La función separate_stems extrae las pistas individuales (voz, batería, bajo, etc.). La función mix_tracks combina las pistas procesadas bajo un nuevo patrón o mezcla.
-Modelos de dominio
-- ProyectoAudio: clase que representa un proyecto completo de procesamiento de audio, gestionando varias canciones o pistas.
-- Cancion: representa un archivo de audio original o transformado.
-- Pista: representa una subdivisión de la canción (por ejemplo, voz, instrumentos) que puede ser procesada individualmente.
+---
 
-7. Resultados esperados y conclusiones
-El sistema permite a usuarios con conocimientos básicos acceder a procesamiento de audio avanzado sin necesidad de programar. Algunas conclusiones preliminares:
-- La separación de stems mejora significativamente la flexibilidad de mezcla.
-- La modularidad del diseño facilita extensiones futuras (por ejemplo: efectos, mastering automático).
-- Limitaciones actuales incluyen requerimientos de hardware para procesamiento pesado y formatos de audio limitados.
+## 🎮 Cómo Usar la Aplicación
 
-8. Futuras extensiones
-- Integrar generación automática de melodías/chords (por ejemplo, utilizando IA).
-- Añadir interfaz gráfica más elaborada con vistas de mezcla/interfaz de usuario en tiempo real.
-- Incorporar plugins VST o exportación directa para estaciones de trabajo de audio.
-- Automatizar publicación de resultados en plataformas como Splice o MercadoLibre (en tu caso, considerando integración con tu ecosistema).
+### 1. Cargar Audio
+*   Arrastra un archivo MP3 o WAV a la zona de "Source Audio".
+*   O haz clic para seleccionar un archivo de tu computadora.
 
-9. Bibliografía
-- Y.-Y. Yang, M. Hira, Z. Ni et al., “TorchAudio: Building Blocks for Audio and Speech Processing”, arXiv preprint, 2021.
-- A. Torfi, “SpeechPy – A Library for Speech Processing and Recognition”, arXiv preprint, 2018.
+### 2. Separar Stems
+*   Haz clic en el botón **"Separate Stems"**.
+*   Espera a que la AI procese el audio (puede tardar 1-3 minutos dependiendo de tu PC).
+*   Verás aparecer 4 pistas: Vocals, Drums, Bass, Other.
+
+### 3. Generar Variaciones (AI)
+*   Arrastra uno de los stems generados (ej. "Drums") a la zona de **"Create"** (abajo a la derecha).
+*   Selecciona uno o más estilos (ej. "Techno", "Lofi").
+*   Haz clic en **"Generate"**.
+*   La AI creará una nueva pista basada en ese instrumento y estilo.
+
+---
+
+## ⚠️ Solución de Problemas Comunes
+
+**Error: "FFmpeg no encontrado"**
+*   Asegúrate de haber instalado FFmpeg y, lo más importante, de haber **agregado FFmpeg a las Variables de Entorno (PATH)** de tu sistema.
+*   Reinicia la terminal después de instalarlo.
+
+**Error de Memoria (CUDA Out of Memory)**
+*   Si tienes una tarjeta gráfica NVIDIA pero poca VRAM, Demucs podría fallar.
+*   El sistema intentará usar CPU automáticamente si falla CUDA, pero será más lento.
+
+**La UI no carga las ondas**
+*   Asegúrate de estar usando un navegador moderno (Chrome, Firefox, Edge).
+*   Revisa la consola del navegador (F12) para ver si hay errores de red.
+
+---
+
+## 💻 Tecnologías
+
+*   **Backend**: Flask (Python)
+*   **Frontend**: HTML5, CSS3, Vanilla JS
+*   **AI Models**:
+    *   [Demucs](https://github.com/facebookresearch/demucs) (Separación de fuentes)
+    *   [MusicGen](https://huggingface.co/facebook/musicgen-small) (Generación de música)
+
+---
+**Desarrollado para PCyT Final**
+ Recognition”, arXiv preprint, 2018.
