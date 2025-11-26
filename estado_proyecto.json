@@ -1,0 +1,244 @@
+[
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 812861,
+    "hora_subida": "2025-11-25T23:08:40.896511",
+    "pistas": [
+      {
+        "nombre": "vocals",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\vocals.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "drums",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\drums.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "bass",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\bass.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "other",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\other.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      }
+    ],
+    "metadatos": {}
+  },
+  {
+    "titulo": "untitled.mp3",
+    "archivo_ruta": "uploads\\untitled.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 42074,
+    "hora_subida": "2025-11-25T23:09:52.947192",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "untitled.mp3",
+    "archivo_ruta": "uploads\\untitled.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 42074,
+    "hora_subida": "2025-11-25T23:16:13.914097",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "untitled.mp3",
+    "archivo_ruta": "uploads\\untitled.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 42074,
+    "hora_subida": "2025-11-25T23:17:43.279821",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 812861,
+    "hora_subida": "2025-11-25T23:21:01.336864",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 812861,
+    "hora_subida": "2025-11-25T23:32:03.125452",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-25T23:46:17.003686",
+    "pistas": [
+      {
+        "nombre": "vocals",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\vocals.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "drums",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\drums.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "bass",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\bass.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "other",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\other.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "vocals",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\vocals.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "drums",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\drums.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "bass",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\bass.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "other",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\other.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "vocals",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\vocals.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "drums",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\drums.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "bass",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\bass.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      },
+      {
+        "nombre": "other",
+        "archivo_ruta": "outputs_remix\\htdemucs\\Infrasonic_Me_Stereo_mix_WAV\\other.wav",
+        "duracion_seg": null,
+        "metadatos": {}
+      }
+    ],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T00:13:04.212975",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T00:42:05.042571",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 812861,
+    "hora_subida": "2025-11-26T01:15:53.290671",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.mp3",
+    "formato": "audio",
+    "tamanio_bytes": 812861,
+    "hora_subida": "2025-11-26T01:32:12.576408",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T01:32:42.530789",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T01:32:53.000676",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T01:33:19.826657",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T01:39:25.654691",
+    "pistas": [],
+    "metadatos": {}
+  },
+  {
+    "titulo": "Infrasonic_Me_Stereo_mix_WAV.wav",
+    "archivo_ruta": "uploads\\Infrasonic_Me_Stereo_mix_WAV.wav",
+    "formato": "audio",
+    "tamanio_bytes": 5644844,
+    "hora_subida": "2025-11-26T01:59:57.726752",
+    "pistas": [],
+    "metadatos": {}
+  }
+]

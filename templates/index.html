@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Generator - AI Stem Transformation</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- ============================================
+             SOURCE AUDIO SECTION
+             ============================================ -->
+        <section class="section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Source Audio</h2>
+                    <p class="section-subtitle">Upload a master track to begin processing</p>
+                </div>
+                <div class="btn-group" id="sourceActions" style="display: none;">
+                    <button class="btn btn-secondary" id="replaceBtn">Replace File</button>
+                    <button class="btn btn-primary" id="separateBtn">Separate Stems</button>
+                </div>
+            </div>
+            
+            <div id="uploadZone" class="upload-zone">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to upload audio</div>
+                <input type="file" id="fileInput" accept="audio/*">
+            </div>
+            
+            <div id="waveformContainer" style="display: none;">
+                <div class="waveform-container">
+                    <div class="waveform-display" id="sourceWaveform"></div>
+                    <div class="waveform-info">
+                        <span id="sourceFileName">-</span>
+                        <div>
+                            <span id="sourceStartTime">START POINT</span>
+                            <span style="margin: 0 1rem;">•</span>
+                            <span id="sourceEndTime">END POINT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+             STEMS SECTION
+             ============================================ -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Stems</h2>
+                <div class="stems-header" id="stemTabs">
+                    <button class="stem-tab active" data-filter="all">All</button>
+                    <button class="stem-tab" data-filter="drums">Drums</button>
+                    <button class="stem-tab" data-filter="vocals">Vocals</button>
+                    <button class="stem-tab" data-filter="bass">Bass</button>
+                </div>
+            </div>
+            
+            <div id="stemsGrid" class="stems-grid">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎵</div>
+                    <p>Processed stems will appear here</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================
+             CREATE SECTION
+             ============================================ -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Create</h2>
+                <p class="section-subtitle">Transform stems into new styles</p>
+            </div>
+            
+            <div class="create-layout">
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">+</div>
+                    <div class="drop-zone-text">Drag stem here</div>
+                </div>
+                
+                <div>
+                    <div class="style-tags">
+                        <div class="style-tag" data-style="lofi">Lofi</div>
+                        <div class="style-tag" data-style="techno">Techno</div>
+                        <div class="style-tag" data-style="live-recorded">Live Recorded</div>
+                        <div class="style-tag" data-style="orchestral">Orchestral</div>
+                        <div class="style-tag" data-style="8bit">8-Bit</div>
+                        <div class="style-tag" data-style="jazz">Jazz</div>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="generateBtn" disabled style="width: 100%;">
+                        Generate
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/app.js"></script>
+</body>
+</html>

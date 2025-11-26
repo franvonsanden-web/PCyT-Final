@@ -1,0 +1,21 @@
+Flask>=2.3.0
+Werkzeug>=2.3.0
+
+numpy==1.26.4
+scipy==1.11.4
+
+librosa==0.10.1
+soundfile>=0.12.1
+
+ffmpeg-python>=0.2.0
+
+# PyTorch + torchaudio compatibles con Demucs en Windows
+torch==2.2.2
+torchaudio==2.2.2 --extra-index-url https://download.pytorch.org/whl/cpu
+
+# Demucs estable
+demucs==4.0.1
+
+transformers>=4.30.0
+python-dotenv
+Flask-WTF

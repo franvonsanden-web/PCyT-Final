@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Generator - UI Demo</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* MODERN MUSIC GENERATOR - COMPLETE STANDALONE STYLES */
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #121212;
+            --bg-tertiary: #1a1a1a;
+            --bg-card: #1e1e1e;
+            --bg-hover: #252525;
+            --accent-blue: #3b82f6;
+            --accent-blue-hover: #2563eb;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --border-color: #2a2a2a;
+            --tag-bg: #262626;
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin-bottom: var(--spacing-xl);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .section-subtitle {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-secondary);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59, 130, 246, 0.05);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            color: var(--text-secondary);
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+        }
+
+        .waveform-container {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+        }
+
+        .waveform-display {
+            width: 100%;
+            height: 120px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .waveform-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: var(--spacing-md);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-blue-hover);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent-blue);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: var(--spacing-sm);
+        }
+
+        .stems-header {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .stem-tab {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .stem-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .stem-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .stems-grid {
+            display: grid;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .stem-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-lg);
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .stem-item:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(4px);
+        }
+
+        .stem-header-row {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .stem-play-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .stem-play-btn:hover {
+            background: var(--accent-blue-hover);
+            transform: scale(1.1);
+        }
+
+        .stem-info {
+            flex: 1;
+        }
+
+        .stem-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stem-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--tag-bg);
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .stem-tag.drums {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        .stem-tag.bass {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+        }
+
+        .stem-tag.vocals {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f472b6;
+        }
+
+        .stem-tag.other {
+            background: rgba(6, 182, 212, 0.2);
+            color: #22d3ee;
+        }
+
+        .stem-meta {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .stem-waveform {
+            width: 100%;
+            height: 60px;
+            background: var(--bg-tertiary);
+            border-radius: var(--radius-sm);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: var(--bg-secondary);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .drop-zone-icon {
+            font-size: 2.5rem;
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .drop-zone-text {
+            color: var(--text-secondary);
+        }
+
+        .style-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .style-tag {
+            padding: 0.5rem 1rem;
+            background: var(--tag-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .style-tag:hover {
+            border-color: var(--accent-blue);
+            color: var(--text-primary);
+        }
+
+        .style-tag.selected {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- SOURCE AUDIO SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Source Audio</h2>
+                    <p class="section-subtitle">Upload a master track to begin processing</p>
+                </div>
+                <div class="btn-group" id="sourceActions" style="display: flex;">
+                    <button class="btn btn-secondary">Replace File</button>
+                    <button class="btn btn-primary">Separate Stems</button>
+                </div>
+            </div>
+
+            <div class="waveform-container">
+                <div class="waveform-display">
+                    <!-- Simulated waveform -->
+                    <canvas id="waveformCanvas"></canvas>
+                </div>
+                <div class="waveform-info">
+                    <span>Infrasonic Ne [Stereo mix (WAV)].wav</span>
+                    <div>
+                        <span>START POINT</span>
+                        <span style="margin: 0 1rem;">•</span>
+                        <span>END POINT</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- STEMS SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Stems</h2>
+                <div class="stems-header">
+                    <button class="stem-tab active">Drums</button>
+                    <button class="stem-tab">Vocals</button>
+                    <button class="stem-tab">Bass</button>
+                </div>
+            </div>
+
+            <div class="stems-grid">
+                <!-- Stem Item 1 -->
+                <div class="stem-item" draggable="true">
+                    <div class="stem-header-row">
+                        <button class="stem-play-btn">▶</button>
+                        <div class="stem-info">
+                            <div class="stem-name">
+                                Drums_Main_Loop_120bpm
+                                <span class="stem-tag drums">DRUMS</span>
+                            </div>
+                            <div class="stem-meta">32 kb • C • 123</div>
+                        </div>
+                    </div>
+                    <div class="stem-waveform"></div>
+                </div>
+
+                <!-- Stem Item 2 -->
+                <div class="stem-item" draggable="true">
+                    <div class="stem-header-row">
+                        <button class="stem-play-btn">▶</button>
+                        <div class="stem-info">
+                            <div class="stem-name">
+                                Bass_Sub_Fmin.wav
+                                <span class="stem-tag bass">BASS</span>
+                            </div>
+                            <div class="stem-meta">32 kb • C • 124</div>
+                        </div>
+                    </div>
+                    <div class="stem-waveform"></div>
+                </div>
+
+                <!-- Stem Item 3 -->
+                <div class="stem-item" draggable="true">
+                    <div class="stem-header-row">
+                        <button class="stem-play-btn">▶</button>
+                        <div class="stem-info">
+                            <div class="stem-name">
+                                Vocals_Dry_Lead.wav
+                                <span class="stem-tag vocals">VOCALS</span>
+                            </div>
+                            <div class="stem-meta">32 kb • Gm • 125</div>
+                        </div>
+                    </div>
+                    <div class="stem-waveform"></div>
+                </div>
+
+                <!-- Stem Item 4 -->
+                <div class="stem-item" draggable="true">
+                    <div class="stem-header-row">
+                        <button class="stem-play-btn">▶</button>
+                        <div class="stem-info">
+                            <div class="stem-name">
+                                Atmosphere_Synth_Pad.wav
+                                <span class="stem-tag other">OTHER</span>
+                            </div>
+                            <div class="stem-meta">32 kb • Am • 127</div>
+                        </div>
+                    </div>
+                    <div class="stem-waveform"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CREATE SECTION -->
+        <section class="section">
+            <div class="section-header">
+                <div>
+                    <h2 class="section-title">Create</h2>
+                    <p class="section-subtitle">Transform stems into new styles</p>
+                </div>
+            </div>
+
+            <div class="drop-zone">
+                <div class="drop-zone-icon">+</div>
+                <div class="drop-zone-text">Drag stem here</div>
+            </div>
+
+            <div class="style-tags">
+                <div class="style-tag">Lofi</div>
+                <div class="style-tag">Techno</div>
+                <div class="style-tag selected">Live Recorded</div>
+                <div class="style-tag">Orchestral</div>
+                <div class="style-tag">8-Bit</div>
+                <div class="style-tag">Jazz</div>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;">Generate</button>
+        </section>
+
+    </div>
+
+    <script>
+        // Draw waveform
+        const canvas = document.getElementById('waveformCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = canvas.parentElement.clientHeight;
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+
+        const centerY = canvas.height / 2;
+        for (let x = 0; x < canvas.width; x++) {
+            const amplitude = Math.sin(x * 0.02) * 20 + Math.random() * 15;
+            ctx.moveTo(x, centerY - amplitude);
+            ctx.lineTo(x, centerY + amplitude);
+        }
+        ctx.stroke();
+
+        // Style tag interaction
+        document.querySelectorAll('.style-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+            });
+        });
+    </script>
+</body>
+
+</html>
