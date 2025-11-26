@@ -118,4 +118,3 @@ python app.py
 
 ---
 **Desarrollado para PCyT Final**
- Recognition”, arXiv preprint, 2018.

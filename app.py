@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from os.path import basename
 from clases import ProyectoAudio, Cancion, Pista
-from procesamiento_audio import separate_stems, mix_tracks, generate_stem_variation
+from procesamiento_audio import separate_stems, mix_tracks, generate_stem_variation, compute_file_hash, validate_stems_integrity
 import time
 
 # -------------------------------------------------------
@@ -74,7 +74,8 @@ def index():
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    """Sube un archivo musical y lo registra en el proyecto."""
+    """Sube un archivo musical y lo registra en el proyecto.
+    Si el archivo ya existe (por hash), devuelve el estado guardado."""
     try:
         if "file" not in request.files:
             return jsonify({"error": "No se envió ningún archivo"}), 400
@@ -88,9 +89,81 @@ def upload_file():
         file.save(filepath)
 
         print(f"📁 Archivo guardado: {filepath}")
+        
+        # ============================================
+        # HASH-BASED FILE RECOGNITION
+        # ============================================
+        file_hash = compute_file_hash(filepath)
+        print(f"🔑 Hash SHA-256: {file_hash[:16]}...")
+        
+        # Check if we've seen this file before
+        cancion_existente = proyecto.encontrar_cancion_por_hash(file_hash)
+        
+        if cancion_existente:
+            print(f"♻️ ARCHIVO RECONOCIDO: {filename}")
+            print(f"   Canción existente: {cancion_existente.titulo}")
+            print(f"   Pistas guardadas: {len(cancion_existente.pistas)}")
+            
+            # Validate source file still exists
+            if not os.path.exists(cancion_existente.archivo_ruta):
+                print(f"⚠️ Archivo original eliminado, actualizando ruta")
+                cancion_existente.archivo_ruta = filepath
+                proyecto.guardar_estado()
+            
+            # Validate stems integrity
+            stems_dict = {p.nombre: p.archivo_ruta for p in cancion_existente.pistas}
+            is_valid, missing = validate_stems_integrity(stems_dict)
+            
+            if not is_valid:
+                print(f"⚠️ Integridad comprometida: {missing}")
+                print(f"   Se requerirá re-separación")
+                restored_stems = []
+            else:
+                # Deduplicate pistas by nombre (stem type)
+                seen_stems = set()
+                unique_pistas = []
+                for pista in cancion_existente.pistas:
+                    if pista.nombre not in seen_stems:
+                        unique_pistas.append(pista)
+                        seen_stems.add(pista.nombre)
+                    else:
+                        print(f"⚠️ Pista duplicada ignorada: {pista.nombre}")
+                
+                # Update if we found duplicates
+                if len(unique_pistas) < len(cancion_existente.pistas):
+                    cancion_existente.pistas = unique_pistas
+                    proyecto.guardar_estado()
+                    print(f"🧹 Duplicados eliminados: {len(cancion_existente.pistas) - len(unique_pistas)}")
+                
+                # Convert to frontend-friendly format
+                restored_stems = []
+                for pista in unique_pistas:
+                    rel_path = os.path.relpath(pista.archivo_ruta, app.config["OUTPUT_FOLDER"])
+                    rel_path_url = rel_path.replace(os.sep, '/')
+                    restored_stems.append({
+                        "name": pista.nombre,
+                        "path": f"outputs_remix/{rel_path_url}",
+                        "type": pista.nombre  # vocals, drums, bass, other
+                    })
+                
+                print(f"✅ {len(restored_stems)} stems restaurados")
+            
+            return jsonify({
+                "success": True,
+                "filename": filename,
+                "mensaje": "Archivo reconocido, estado restaurado",
+                "restored": True,
+                "stems": restored_stems,
+                "file_hash": file_hash
+            })
 
-        # Crear objeto Cancion
-        nueva_cancion = Cancion(filename, filepath, "audio")
+        # ============================================
+        # NEW FILE - CREATE ENTRY
+        # ============================================
+        print(f"✨ ARCHIVO NUEVO: {filename}")
+        
+        # Crear objeto Cancion con hash
+        nueva_cancion = Cancion(filename, filepath, "audio", file_hash)
 
         # Añadir al proyecto
         proyecto.agregar_cancion(nueva_cancion)
@@ -101,11 +174,15 @@ def upload_file():
         return jsonify({
             "success": True,
             "filename": filename,
-            "mensaje": "Archivo subido exitosamente"
+            "mensaje": "Archivo subido exitosamente",
+            "restored": False,
+            "file_hash": file_hash
         })
 
     except Exception as e:
         print(f"Error al subir archivo: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": f"Error al subir archivo: {str(e)}"}), 500
 
 
@@ -141,6 +218,7 @@ def proyecto_view():
 def separar():
     """
     Separa una canción en stems usando Demucs.
+    Inteligente: retorna stems cacheados si existen y son válidos.
     """
     print("Endpoint /separar llamado")
 
@@ -162,7 +240,7 @@ def separar():
         print(f"Archivo no encontrado: {ruta_archivo}")
         return jsonify({"error": f"Archivo no encontrado: {nombre_archivo}"}), 404
 
-    # Verificar que el archivo NO esté vacío (esta era una causa frecuente)
+    # Verificar que el archivo NO esté vacío
     size = os.path.getsize(ruta_archivo)
     print(f"Tamaño del archivo original: {size} bytes")
 
@@ -176,21 +254,54 @@ def separar():
         return jsonify({"error": "Canción no registrada en el proyecto"}), 404
 
     try:
-        print(f"Iniciando separación de stems...")
+        # ============================================
+        # CHECK FOR CACHED STEMS IN PROJECT STATE
+        # ============================================
+        if cancion.pistas:
+            print(f"🔍 Chequeando {len(cancion.pistas)} stems guardados...")
+            
+            stems_dict = {p.nombre: p.archivo_ruta for p in cancion.pistas}
+            is_valid, missing = validate_stems_integrity(stems_dict)
+            
+            if is_valid:
+                print(f"⚡ CACHE_HIT: Stems válidos encontrados en proyecto")
+                
+                # Convert to public URLs
+                pistas_publicas = {}
+                for pista in cancion.pistas:
+                    rel_path = os.path.relpath(pista.archivo_ruta, app.config["OUTPUT_FOLDER"])
+                    rel_path_url = rel_path.replace(os.sep, '/')
+                    pistas_publicas[pista.nombre] = f"outputs_remix/{rel_path_url}"
+                    print(f"   ✅ {pista.nombre}")
+                
+                return jsonify({
+                    "mensaje": "Stems recuperados del cache",
+                    "pistas": pistas_publicas,
+                    "cached": True
+                })
+            else:
+                print(f"⚠️ INTEGRITY_FAIL: {missing}")
+                print(f"   Limpiando estado y re-procesando...")
+                cancion.pistas = []  # Clear invalid stems
+        
+        # ============================================
+        # CACHE MISS OR INTEGRITY FAIL - RUN DEMUCS
+        # ============================================
+        print(f"❌ CACHE_MISS: Ejecutando separación...")
         print(f"Archivo: {ruta_archivo}")
         print(f"Output: {app.config['OUTPUT_FOLDER']}")
 
-        # FORZAMOS EJECUCIÓN SÍNCRONA Y BLOQUEANTE
+        # separate_stems now has internal caching for filesystem
         stems = separate_stems(ruta_archivo, app.config["OUTPUT_FOLDER"])
 
-        # VALIDACIÓN CLAVE: asegurarse de que los stems existen y NO están vacíos
+        # VALIDACIÓN: asegurarse de que los stems existen y NO están vacíos
         stems_validos = {}
         for name, path in stems.items():
             if os.path.exists(path) and os.path.getsize(path) > 1000:
                 stems_validos[name] = path
                 print(f"Pista válida: {name} ({os.path.getsize(path)} bytes)")
             else:
-                print(f" Pista inválida o vacía: {name} ({os.path.getsize(path) if os.path.exists(path) else 0} bytes)")
+                print(f"⚠️ Pista inválida o vacía: {name} ({os.path.getsize(path) if os.path.exists(path) else 0} bytes)")
 
         if not stems_validos:
             return jsonify({
@@ -198,7 +309,8 @@ def separar():
                 "detalle": "Revisa separate_stems(): no está esperando a que Demucs escriba."
             }), 500
 
-        # Añadir cada pista válida al proyecto
+        # Añadir cada pista válida al proyecto (actualizar estado)
+        cancion.pistas = []  # Clear old stems
         for name, path in stems_validos.items():
             pista = Pista(name, path)
             cancion.agregar_pista(pista)
@@ -206,21 +318,17 @@ def separar():
 
         proyecto.guardar_estado()
 
-        # Convertimos las rutas REALES a rutas PÚBLICAS correctas
+        # Convertir a rutas públicas
         pistas_publicas = {}
         for name, path in stems_validos.items():
-            # Obtenemos el path relativo desde la carpeta de outputs
-            # Ejemplo: htdemucs/cancion/vocals.wav
             rel_path = os.path.relpath(path, app.config["OUTPUT_FOLDER"])
-            
-            # Aseguramos slashs para URL (Windows usa backslash)
             rel_path_url = rel_path.replace(os.sep, '/')
-            
             pistas_publicas[name] = f"outputs_remix/{rel_path_url}"
 
         return jsonify({
             "mensaje": "Separación completada exitosamente",
-            "pistas": pistas_publicas
+            "pistas": pistas_publicas,
+            "cached": False
         })
 
     except Exception as e:
@@ -330,6 +438,49 @@ def generate():
         return jsonify({
             "error": f"Error durante la generación: {str(e)}",
             "detalle": traceback.format_exc()
+        }), 500
+
+
+# -------------------------------------------------------
+# Cache & Diagnostics
+# -------------------------------------------------------
+
+@app.route("/api/diagnostics")
+def diagnostics():
+    """
+    Provee diagnósticos del cache y estado del sistema.
+    """
+    from cache_manager import get_diagnostics
+    
+    try:
+        report = get_diagnostics(app.config["OUTPUT_FOLDER"], "estado_proyecto.json")
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/cache/cleanup", methods=["POST"])
+def cleanup_cache():
+    """
+    Limpia stems huérfanos (no referenciados en estado_proyecto.json).
+    Requiere confirmación explícita del usuario.
+    """
+    from cache_manager import CacheManager
+    
+    try:
+        manager = CacheManager(app.config["OUTPUT_FOLDER"], "estado_proyecto.json")
+        count, deleted = manager.cleanup_orphaned_stems()
+        
+        return jsonify({
+            "success": True,
+            "deleted_count": count,
+            "deleted_files": deleted
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            "error": str(e),
+            "traceback": traceback.format_exc()
         }), 500
 
 

@@ -91,10 +91,32 @@ async function handleFileUpload(file) {
         // Store the sanitized filename returned by the server
         state.sourceFile = {
             name: data.filename,  // Use server's sanitized filename
-            originalName: file.name
+            originalName: file.name,
+            hash: data.file_hash
         };
 
-        showNotification('File uploaded successfully', 'success');
+        // ============================================
+        // HANDLE RESTORED STATE
+        // ============================================
+        if (data.restored && data.stems && data.stems.length > 0) {
+            console.log('🔄 File recognized, restoring state...');
+            console.log(`📦 ${data.stems.length} stems loaded from cache`);
+
+            // Populate stems state
+            state.stems = data.stems.map(stem => ({
+                name: stem.name,
+                path: stem.path,
+                type: stem.type || detectStemType(stem.name)
+            }));
+
+            // Render immediately
+            renderStems();
+
+            showNotification(`File recognized! ${data.stems.length} stems loaded from cache`, 'success');
+        } else {
+            console.log('✨ New file uploaded');
+            showNotification('File uploaded successfully', 'success');
+        }
     } catch (error) {
         console.error('Upload error:', error);
         showNotification('Upload failed', 'error');
@@ -193,7 +215,13 @@ document.getElementById('separateBtn')?.addEventListener('click', async () => {
             }));
 
             renderStems();
-            showNotification('Stems separated successfully', 'success');
+
+            // Show different message for cached vs fresh separation
+            if (data.cached) {
+                showNotification('Stems loaded from cache instantly!', 'success');
+            } else {
+                showNotification('Stems separated successfully', 'success');
+            }
         }
     } catch (error) {
         console.error('Separation error:', error);
@@ -258,6 +286,7 @@ function renderStems(filter = 'all') {
                         <span class="stem-tag ${stem.type}">${stem.type}</span>
                     </div>
                 </div>
+                <a href="${stem.path}" download="${stem.name}" class="stem-download-btn" title="Download stem">⬇</a>
             </div>
             <div class="stem-waveform" id="${waveformId}">
                 <div class="loading-waveform">Loading waveform...</div>

@@ -3,7 +3,7 @@
 # Objetivo: separar la lógica de datos (modelo) del servidor (app.py)
 
 import os
-from procesamiento_audio import separate_stems, generate_accompaniment, mix_tracks
+from procesamiento_audio import separate_stems, generate_accompaniment, mix_tracks, compute_file_hash
 from datetime import datetime
 from typing import List, Optional
 from gestor_archivos import GestorArchivos
@@ -36,11 +36,13 @@ class Cancion:
     Representa un archivo de canción subido por el usuario.
     Mantiene metadatos básicos y referencia a pistas (si se separó en stems).
     """
-    def __init__(self, titulo: str, archivo_ruta: str, formato: Optional[str] = None):
+    def __init__(self, titulo: str, archivo_ruta: str, formato: Optional[str] = None, file_hash: Optional[str] = None):
         self.titulo = titulo
         self.archivo_ruta = archivo_ruta
         self.formato = formato or self._infer_format()
         self.tamanio_bytes = self._get_size_bytes()
+        self.file_hash = file_hash or self._compute_hash()  # SHA-256 for deduplication
+        self.file_size = self.tamanio_bytes  # Redundant but explicit for validation
         self.hora_subida = datetime.now()
         self.pistas: List[Pista] = []  # listas de Pista asociadas tras separación
         self.metadatos = {}            # por ejemplo artista, album, bpm, etc.
@@ -56,6 +58,14 @@ class Cancion:
             return os.path.getsize(self.archivo_ruta)
         except Exception:
             return 0
+    
+    def _compute_hash(self) -> str:
+        """Computes SHA-256 hash for file identification."""
+        try:
+            return compute_file_hash(self.archivo_ruta)
+        except Exception as e:
+            print(f"Warning: Could not compute hash for {self.archivo_ruta}: {e}")
+            return ""
 
     def agregar_pista(self, pista: Pista):
         """Añade una pista a la canción (por ejemplo tras separar stems)."""
@@ -81,6 +91,8 @@ class Cancion:
             "archivo_ruta": self.archivo_ruta,
             "formato": self.formato,
             "tamanio_bytes": self.tamanio_bytes,
+            "file_hash": self.file_hash,
+            "file_size": self.file_size,
             "hora_subida": self.hora_subida.isoformat(),
             "pistas": [p.to_dict() for p in self.pistas],
             "metadatos": self.metadatos
@@ -118,6 +130,13 @@ class ProyectoAudio:
             if os.path.basename(c.archivo_ruta) == filename:
                 return c
         return None
+    
+    def encontrar_cancion_por_hash(self, file_hash: str) -> Optional[Cancion]:
+        """Busca una canción por hash SHA-256 del contenido del archivo."""
+        for c in self.canciones:
+            if c.file_hash and c.file_hash == file_hash:
+                return c
+        return None
 
     def listar_canciones(self) -> List[dict]:
         """Devuelve una lista con información simple de las canciones del proyecto."""
@@ -152,16 +171,32 @@ class ProyectoAudio:
         for c_data in data:
             try:
                 # Reconstruir Cancion
-                cancion = Cancion(c_data["titulo"], c_data["archivo_ruta"], c_data.get("formato"))
+                cancion = Cancion(
+                    c_data["titulo"], 
+                    c_data["archivo_ruta"], 
+                    c_data.get("formato"),
+                    c_data.get("file_hash")  # Load hash from JSON
+                )
                 cancion.tamanio_bytes = c_data.get("tamanio_bytes", 0)
+                cancion.file_size = c_data.get("file_size", cancion.tamanio_bytes)
                 if "hora_subida" in c_data:
                     cancion.hora_subida = datetime.fromisoformat(c_data["hora_subida"])
                 
                 # Reconstruir Pistas
+                pistas_loaded = []
+                seen_stems = set()
+                
                 for p_data in c_data.get("pistas", []):
-                    pista = Pista(p_data["nombre"], p_data["archivo_ruta"], p_data.get("duracion_seg"))
-                    pista.metadatos = p_data.get("metadatos", {})
-                    cancion.agregar_pista(pista)
+                    # Deduplicate by nombre
+                    if p_data["nombre"] not in seen_stems:
+                        pista = Pista(p_data["nombre"], p_data["archivo_ruta"], p_data.get("duracion_seg"))
+                        pista.metadatos = p_data.get("metadatos", {})
+                        pistas_loaded.append(pista)
+                        seen_stems.add(p_data["nombre"])
+                    else:
+                        print(f"⚠️ Pista duplicada omitida al cargar: {p_data['nombre']} para {cancion.titulo}")
+                
+                cancion.pistas = pistas_loaded
                 
                 self.canciones.append(cancion)
                 print(f"Canción restaurada: {cancion.titulo} con {len(cancion.pistas)} pistas")

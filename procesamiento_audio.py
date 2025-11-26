@@ -1,6 +1,7 @@
 import os
 import subprocess
-from typing import List
+import hashlib
+from typing import List, Dict, Tuple
 from pathlib import Path
 
 # Lazy imports - only when needed
@@ -39,6 +40,47 @@ def ensure_dir(path):
     Path(path).mkdir(parents=True, exist_ok=True)
 
 
+def compute_file_hash(filepath: str) -> str:
+    """
+    Computes SHA-256 hash of a file for content-based identification.
+    Uses chunked reading to handle large files efficiently.
+    
+    Args:
+        filepath: Path to the file
+        
+    Returns:
+        Hex string of SHA-256 hash
+    """
+    sha256_hash = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        # Read in 64KB chunks to handle large files
+        for byte_block in iter(lambda: f.read(65536), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+
+def validate_stems_integrity(stems_dict: Dict[str, str]) -> Tuple[bool, List[str]]:
+    """
+    Validates that all stem files exist and are non-empty.
+    
+    Args:
+        stems_dict: Dictionary of {stem_name: file_path}
+        
+    Returns:
+        Tuple of (is_valid, missing_files)
+        - is_valid: True if all stems exist and > 1KB
+        - missing_files: List of missing/invalid stem names
+    """
+    missing = []
+    for name, path in stems_dict.items():
+        if not os.path.exists(path):
+            missing.append(f"{name} (not found)")
+        elif os.path.getsize(path) < 1000:
+            missing.append(f"{name} (empty, {os.path.getsize(path)} bytes)")
+    
+    return len(missing) == 0, missing
+
+
 def save_audio(path, audio, sr=SAMPLE_RATE):
     """Guarda audio en formato WAV"""
     import soundfile as sf
@@ -55,6 +97,7 @@ def save_audio(path, audio, sr=SAMPLE_RATE):
 def separate_stems(input_audio, out_dir):
     """
     Separa un archivo de audio en stems usando Demucs.
+    Implementa smart caching: si los stems ya existen y son válidos, los devuelve sin re-procesar.
     
     Args:
         input_audio: Ruta al archivo de audio a separar
@@ -68,23 +111,58 @@ def separate_stems(input_audio, out_dir):
         FileNotFoundError: Si el archivo de entrada no existe
         RuntimeError: Si Demucs falla o no genera los outputs esperados
     """
+    import time
+    
     if not os.path.exists(input_audio):
         raise FileNotFoundError(f"El archivo no existe: {input_audio}")
 
     os.makedirs(out_dir, exist_ok=True)
 
-    print("🎵 Iniciando separación de stems con Demucs...")
-    print(f"📁 Archivo: {input_audio}")
-    print(f"📁 Salida: {out_dir}")
+    # Nombre del archivo sin extensión (para ubicar la carpeta de salida)
+    song_name = os.path.splitext(os.path.basename(input_audio))[0]
+    demucs_output_dir = os.path.join(out_dir, "htdemucs", song_name)
+    expected_stems = ["vocals", "drums", "bass", "other"]
+
+    # ============================================
+    # SMART CACHE CHECK
+    # ============================================
+    start_time = time.time()
+    
+    existing_stems = {}
+    all_exist = True
+    
+    if os.path.exists(demucs_output_dir):
+        for stem_name in expected_stems:
+            stem_path = os.path.join(demucs_output_dir, f"{stem_name}.wav")
+            if os.path.exists(stem_path) and os.path.getsize(stem_path) > 1000:
+                existing_stems[stem_name] = stem_path
+            else:
+                all_exist = False
+                break
+    else:
+        all_exist = False
+
+    if all_exist:
+        elapsed = time.time() - start_time
+        time_saved = 180  # Approximate Demucs processing time
+        log(f"⚡ CACHE_HIT: {song_name} - stems found, skipping Demucs")
+        log(f"   Validation: {elapsed:.2f}s | Time saved: ~{time_saved}s")
+        
+        for stem_name, stem_path in existing_stems.items():
+            size_mb = os.path.getsize(stem_path) / (1024 * 1024)
+            log(f"   ✅ {stem_name}: {size_mb:.1f}MB")
+        
+        return existing_stems
+
+    # ============================================
+    # CACHE MISS - RUN DEMUCS
+    # ============================================
+    log(f"❌ CACHE_MISS: {song_name} - running Demucs separation")
+    log(f"📁 Archivo: {input_audio}")
+    log(f"📁 Salida: {out_dir}")
 
     try:
-        # Nombre del archivo sin extensión (para ubicar la carpeta de salida)
-        song_name = os.path.splitext(os.path.basename(input_audio))[0]
-        
         # Comando Demucs
-        # -n htdemucs: usa el modelo pre-entrenado htdemucs (mejor calidad)
-        # -o out_dir: directorio de salida
-        # --two-stems: Opción comentada por ahora, usa 4 stems por defecto
         command = [
             "demucs",
             "-n", "htdemucs",
@@ -113,9 +191,7 @@ def separate_stems(input_audio, out_dir):
             print(f"❌ Error de Demucs:\n{stderr}")
             raise RuntimeError(f"Demucs falló con código {process.returncode}: {stderr}")
         
-        # Demucs guarda en: out_dir/htdemucs/song_name/{vocals,drums,bass,other}.wav
-        demucs_output_dir = os.path.join(out_dir, "htdemucs", song_name)
-        
+        # Verificar que la carpeta fue creada
         if not os.path.exists(demucs_output_dir):
             raise RuntimeError(
                 f"Demucs no generó la carpeta esperada: {demucs_output_dir}"
@@ -123,8 +199,6 @@ def separate_stems(input_audio, out_dir):
         
         # Construir diccionario de stems
         stems = {}
-        expected_stems = ["vocals", "drums", "bass", "other"]
-        
         for stem_name in expected_stems:
             stem_path = os.path.join(demucs_output_dir, f"{stem_name}.wav")
             
@@ -147,7 +221,8 @@ def separate_stems(input_audio, out_dir):
                 "Verifica que el archivo de entrada sea un audio válido."
             )
         
-        print(f"🎉 Separación completada exitosamente: {len(stems)} stems")
+        elapsed = time.time() - start_time
+        log(f"🎉 Separación completada: {len(stems)} stems en {elapsed:.1f}s")
         return stems
         
     except FileNotFoundError as e:
